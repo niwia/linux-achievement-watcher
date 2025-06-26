@@ -1,0 +1,9 @@
+[Desktop Entry]
+Name=Achievement Watcher
+Comment=Track achievements from Steam, Heroic, and non-Steam games
+Exec=achievement-watcher
+Icon=achievement-watcher
+Terminal=false
+Type=Application
+Categories=Game;Utility;
+Keywords=Steam;Games;Achievements;

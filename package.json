@@ -1,0 +1,42 @@
+{
+  "name": "achievement-watcher",
+  "version": "1.0.0",
+  "description": "Achievement tracking application for Linux gaming",
+  "main": "src/main.js",
+  "scripts": {
+    "start": "electron .",
+    "build": "electron-builder",
+    "dev": "electron . --debug"
+  },
+  "build": {
+    "appId": "com.achievementwatcher.app",
+    "productName": "Achievement Watcher",
+    "linux": {
+      "target": ["AppImage"],
+      "category": "Game",
+      "icon": "build/icons/icon.svg"
+    },
+    "files": [
+      "src/**/*",
+      "package.json"
+    ],
+    "directories": {
+      "buildResources": "build",
+      "output": "dist"
+    }
+  },
+  "dependencies": {
+    "@electron/remote": "^2.0.10",
+    "electron-store": "^8.1.0",
+    "fast-glob": "^3.3.0",
+    "ini": "^4.1.1",
+    "node-fetch": "^2.6.11",
+    "normalize-path": "^3.0.0"
+  },
+  "devDependencies": {
+    "electron": "^25.2.0",
+    "electron-builder": "^24.4.0"
+  },
+  "author": "",
+  "license": "MIT"
+}

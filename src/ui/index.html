@@ -1,0 +1,265 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Achievement Watcher</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css">
+    <style>
+        :root {
+            --steam-bg: #1b2838;
+            --steam-text: #c7d5e0;
+            --steam-accent: #66c0f4;
+        }
+
+        body {
+            background-color: var(--steam-bg);
+            color: var(--steam-text);
+            font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+        }
+
+        .achievement {
+            background: rgba(0, 0, 0, 0.3);
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            transition: all 0.3s ease;
+        }
+
+        .achievement:hover {
+            background: rgba(0, 0, 0, 0.5);
+            border-color: var(--steam-accent);
+        }
+
+        .achievement.unlocked {
+            border-color: #5ba32b;
+        }
+
+        ::-webkit-scrollbar {
+            width: 12px;
+        }
+
+        ::-webkit-scrollbar-track {
+            background: rgba(0, 0, 0, 0.3);
+        }
+
+        ::-webkit-scrollbar-thumb {
+            background: var(--steam-accent);
+            border-radius: 6px;
+        }
+
+        .settings-tab.active {
+            background: var(--steam-accent);
+            color: white;
+        }
+    </style>
+</head>
+<body class="min-h-screen">
+    <!-- Header -->
+    <header class="bg-[#171a21] p-4 shadow-lg">
+        <div class="container mx-auto flex justify-between items-center">
+            <h1 class="text-2xl font-bold text-white">Achievement Watcher</h1>
+            <div class="flex gap-4">
+                <button id="scanBtn" class="bg-[#66c0f4] hover:bg-[#1999ff] text-white px-4 py-2 rounded-md transition-colors">
+                    <i class="fas fa-sync-alt mr-2"></i>Scan Games
+                </button>
+                <button id="settingsBtn" class="bg-gray-700 hover:bg-gray-600 text-white px-4 py-2 rounded-md transition-colors">
+                    <i class="fas fa-cog mr-2"></i>Settings
+                </button>
+            </div>
+        </div>
+    </header>
+
+    <!-- Main Content -->
+    <main class="container mx-auto p-4">
+        <!-- Game List -->
+        <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4" id="gameList">
+            <!-- Games will be inserted here -->
+        </div>
+
+        <!-- Loading Overlay -->
+        <div id="loadingOverlay" class="hidden fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center">
+            <div class="bg-[#1b2838] p-8 rounded-lg shadow-xl text-center">
+                <div class="animate-spin rounded-full h-16 w-16 border-t-2 border-b-2 border-[#66c0f4] mx-auto"></div>
+                <p class="mt-4 text-lg">Scanning for achievements...</p>
+            </div>
+        </div>
+    </main>
+
+    <!-- Enhanced Settings Modal -->
+    <div id="settingsModal" class="hidden fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center">
+        <div class="bg-[#1b2838] rounded-lg shadow-xl w-full max-w-4xl h-3/4 flex flex-col">
+            <div class="p-4 border-b border-gray-700">
+                <h2 class="text-xl font-bold">Settings</h2>
+            </div>
+            
+            <div class="flex flex-1 overflow-hidden">
+                <!-- Settings Navigation -->
+                <div class="w-64 border-r border-gray-700 p-4 space-y-2">
+                    <button class="settings-tab active w-full text-left p-2 rounded" data-tab="general">
+                        <i class="fas fa-cog mr-2"></i>General
+                    </button>
+                    <button class="settings-tab w-full text-left p-2 rounded" data-tab="paths">
+                        <i class="fas fa-folder mr-2"></i>Game Paths
+                    </button>
+                    <button class="settings-tab w-full text-left p-2 rounded" data-tab="api">
+                        <i class="fas fa-cloud mr-2"></i>API Settings
+                    </button>
+                    <button class="settings-tab w-full text-left p-2 rounded" data-tab="notifications">
+                        <i class="fas fa-bell mr-2"></i>Notifications
+                    </button>
+                    <button class="settings-tab w-full text-left p-2 rounded" data-tab="advanced">
+                        <i class="fas fa-tools mr-2"></i>Advanced
+                    </button>
+                </div>
+
+                <!-- Settings Content -->
+                <div class="flex-1 p-6 overflow-y-auto">
+                    <!-- General Settings -->
+                    <div class="settings-content active" data-tab="general">
+                        <div class="space-y-4">
+                            <div class="flex items-center justify-between">
+                                <label>Show Notifications</label>
+                                <input type="checkbox" id="notificationToggle" class="w-5 h-5">
+                            </div>
+                            <div class="flex items-center justify-between">
+                                <label>Scan on Startup</label>
+                                <input type="checkbox" id="scanStartupToggle" class="w-5 h-5">
+                            </div>
+                            <div class="flex items-center justify-between">
+                                <label>Auto-refresh Interval (minutes)</label>
+                                <input type="number" id="refreshInterval" class="bg-gray-700 rounded p-2 w-24" min="1" max="60">
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Game Paths Settings -->
+                    <div class="settings-content hidden" data-tab="paths">
+                        <div class="space-y-4">
+                            <div class="space-y-2">
+                                <label>Steam Installation Path</label>
+                                <div class="flex gap-2">
+                                    <input type="text" id="steamPath" class="flex-1 bg-gray-700 rounded p-2">
+                                    <button class="bg-gray-700 px-4 py-2 rounded hover:bg-gray-600">Browse</button>
+                                </div>
+                            </div>
+                            <div class="space-y-2">
+                                <label>Heroic Games Path</label>
+                                <div class="flex gap-2">
+                                    <input type="text" id="heroicPath" class="flex-1 bg-gray-700 rounded p-2">
+                                    <button class="bg-gray-700 px-4 py-2 rounded hover:bg-gray-600">Browse</button>
+                                </div>
+                            </div>
+                            <div class="space-y-2">
+                                <label>Additional Game Folders</label>
+                                <div id="additionalPaths" class="space-y-2">
+                                    <!-- Additional paths will be added here -->
+                                </div>
+                                <button class="bg-[#66c0f4] text-white px-4 py-2 rounded hover:bg-[#1999ff]">
+                                    <i class="fas fa-plus mr-2"></i>Add Path
+                                </button>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- API Settings -->
+                    <div class="settings-content hidden" data-tab="api">
+                        <div class="space-y-4">
+                            <div class="space-y-2">
+                                <label>Steam API Key</label>
+                                <input type="text" id="steamApiKey" class="w-full bg-gray-700 rounded p-2">
+                                <p class="text-sm text-gray-400">Get your API key from <a href="https://steamcommunity.com/dev/apikey" class="text-[#66c0f4]">Steam Developer Portal</a></p>
+                            </div>
+                            <div class="space-y-2">
+                                <label>Steam User ID</label>
+                                <input type="text" id="steamUserId" class="w-full bg-gray-700 rounded p-2">
+                            </div>
+                            <div class="flex items-center justify-between">
+                                <label>Use SteamCMD for Game Data</label>
+                                <input type="checkbox" id="useSteamCmd" class="w-5 h-5">
+                            </div>
+                            <div class="space-y-2">
+                                <label>SteamCMD Path</label>
+                                <div class="flex gap-2">
+                                    <input type="text" id="steamCmdPath" class="flex-1 bg-gray-700 rounded p-2">
+                                    <button class="bg-gray-700 px-4 py-2 rounded hover:bg-gray-600">Browse</button>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Notification Settings -->
+                    <div class="settings-content hidden" data-tab="notifications">
+                        <div class="space-y-4">
+                            <div class="flex items-center justify-between">
+                                <label>Achievement Unlock Notifications</label>
+                                <input type="checkbox" id="achievementNotify" class="w-5 h-5">
+                            </div>
+                            <div class="flex items-center justify-between">
+                                <label>Progress Update Notifications</label>
+                                <input type="checkbox" id="progressNotify" class="w-5 h-5">
+                            </div>
+                            <div class="flex items-center justify-between">
+                                <label>Game Session Summary</label>
+                                <input type="checkbox" id="summaryNotify" class="w-5 h-5">
+                            </div>
+                            <div class="space-y-2">
+                                <label>Notification Sound</label>
+                                <select id="notificationSound" class="w-full bg-gray-700 rounded p-2">
+                                    <option value="default">Default</option>
+                                    <option value="steam">Steam</option>
+                                    <option value="ps5">PlayStation 5</option>
+                                    <option value="xbox">Xbox</option>
+                                </select>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Advanced Settings -->
+                    <div class="settings-content hidden" data-tab="advanced">
+                        <div class="space-y-4">
+                            <div class="flex items-center justify-between">
+                                <label>Debug Mode</label>
+                                <input type="checkbox" id="debugMode" class="w-5 h-5">
+                            </div>
+                            <div class="flex items-center justify-between">
+                                <label>Cache Game Data</label>
+                                <input type="checkbox" id="cacheData" class="w-5 h-5">
+                            </div>
+                            <div class="space-y-2">
+                                <label>Cache Directory</label>
+                                <div class="flex gap-2">
+                                    <input type="text" id="cachePath" class="flex-1 bg-gray-700 rounded p-2">
+                                    <button class="bg-gray-700 px-4 py-2 rounded hover:bg-gray-600">Browse</button>
+                                </div>
+                            </div>
+                            <div class="space-y-2">
+                                <label>Log Level</label>
+                                <select id="logLevel" class="w-full bg-gray-700 rounded p-2">
+                                    <option value="error">Error</option>
+                                    <option value="warn">Warning</option>
+                                    <option value="info">Info</option>
+                                    <option value="debug">Debug</option>
+                                </select>
+                            </div>
+                            <button class="bg-red-600 text-white px-4 py-2 rounded hover:bg-red-700">
+                                Clear All Data
+                            </button>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="p-4 border-t border-gray-700 flex justify-end gap-4">
+                <button id="closeSettingsBtn" class="bg-gray-700 hover:bg-gray-600 text-white px-4 py-2 rounded-md">
+                    Cancel
+                </button>
+                <button id="saveSettingsBtn" class="bg-[#66c0f4] hover:bg-[#1999ff] text-white px-4 py-2 rounded-md">
+                    Save Changes
+                </button>
+            </div>
+        </div>
+    </div>
+
+    <script src="./renderer.js"></script>
+</body>
+</html>
