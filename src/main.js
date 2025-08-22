@@ -122,7 +122,7 @@ function createWindow() {
 }
 
 // Initialize app
-async function initialize() {
+async function appInitialize() {
     await loadSettings();
     notifier = new LinuxNotification(settings.notifications);
     scanner = new AchievementScanner(settings);
@@ -130,7 +130,7 @@ async function initialize() {
 
 // App lifecycle
 app.whenReady().then(async () => {
-    await initialize();
+    await appInitialize();
     createWindow();
     setupAutoRefresh();
 
